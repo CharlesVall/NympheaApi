@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.0"
+   width="175"
+   height="100"
+   id="svg1306">
+  <metadata>
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     style="fill:#666666;font-style:normal;font-variant:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill-opacity:1;stroke:none;">
+    <text
+       x="87.5"
+       y="23"
+       style="font-size:14px;font-weight:bold;font-family:Bitstream Vera Sans"
+       xml:space="preserve">IMAGE MANQUANTE</text>
+    <text
+       x="87.5"
+       y="48"
+       style="font-size:12px;font-weight:normal;font-family:MS Reference Sans Serif"
+       xml:space="preserve"><tspan
+         x="87.5"
+         y="48">Une illustration sous</tspan><tspan
+         x="87.5"
+         y="63">licence libre serait la</tspan><tspan
+         x="87.5"
+         y="79">bienvenue</tspan></text>
+  </g>
+</svg>
