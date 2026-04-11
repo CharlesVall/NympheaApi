@@ -14,10 +14,10 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Nymphéas API")
-                        .description("Catalogue exhaustif des Nymphéas de Claude Monet")
+                        .description("Exhaustive catalog of Claude Monet Nympheas")
                         .version("v1")
                         .contact(new Contact()
-                                .name("Nymphéas API")
+                                .name("Nympheas API - Git repository")
                                 .url("https://github.com/CharlesVall/NympheaApi")));
     }
 }

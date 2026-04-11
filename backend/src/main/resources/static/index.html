@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Nymphéas API — Claude Monet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:    #1a1714;
+            --paper:  #f5f0e8;
+            --warm:   #c8a97a;
+            --muted:  #8c8278;
+            --accent: #4a7c6f;
+            --light:  #e8e0d0;
+            --mono:   'DM Mono', monospace;
+            --serif:  'Cormorant Garamond', Georgia, serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--serif);
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0; opacity: 0.4;
+        }
+
+        /* ── LANG TOGGLE ── */
+        .lang-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        .lang-btn {
+            background: none; border: none; cursor: pointer;
+            font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--muted);
+            padding: 0.2rem 0.4rem; transition: color 0.2s;
+        }
+        .lang-btn.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+        .lang-btn:hover { color: var(--ink); }
+        .lang-sep { color: var(--light); font-family: var(--mono); font-size: 0.65rem; }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative; min-height: 100vh;
+            display: grid; grid-template-rows: auto 1fr auto;
+            padding: 3rem 4rem; overflow: hidden;
+        }
+        .hero::after {
+            content: ''; position: absolute; bottom: -20%; right: -10%;
+            width: 70vw; height: 70vw; border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,169,122,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .nav { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+        .nav-left { display: flex; align-items: center; gap: 2rem; }
+        .nav-right { display: flex; align-items: center; gap: 2rem; }
+        .nav-logo { font-size: 0.75rem; font-family: var(--mono); color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+        .nav-link { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; transition: opacity 0.2s; }
+        .nav-link:hover { opacity: 0.6; }
+
+        .hero-body { display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 1; padding: 4rem 0; }
+
+        .eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--warm); margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+
+        .hero-title { font-size: clamp(4rem, 12vw, 10rem); font-weight: 300; line-height: 0.9; letter-spacing: -0.02em; opacity: 0; animation: fadeUp 0.9s ease forwards 0.4s; }
+        .hero-title em { font-style: italic; color: var(--warm); }
+
+        .hero-sub { margin-top: 2.5rem; font-size: 1.25rem; font-weight: 300; line-height: 1.7; color: var(--muted); max-width: 44ch; opacity: 0; animation: fadeUp 0.9s ease forwards 0.6s; }
+
+        .hero-actions { margin-top: 3rem; display: flex; gap: 1.5rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s ease forwards 0.8s; }
+
+        .btn { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 0.9rem 2rem; border: 1px solid; cursor: pointer; transition: all 0.25s ease; display: inline-block; }
+        .btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+        .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+        .btn-ghost { background: transparent; color: var(--ink); border-color: var(--light); }
+        .btn-ghost:hover { border-color: var(--ink); }
+
+        .hero-footer { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; position: relative; z-index: 1; }
+
+        /* ── STATS ── */
+        .stats { background: var(--ink); color: var(--paper); padding: 2.5rem 4rem; display: flex; gap: 4rem; flex-wrap: wrap; }
+        .stat { display: flex; flex-direction: column; gap: 0.3rem; }
+        .stat-number { font-size: 2.5rem; font-weight: 300; letter-spacing: -0.02em; color: var(--warm); }
+        .stat-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+
+        /* ── SECTION ── */
+        section { padding: 6rem 4rem; position: relative; }
+        .section-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--warm); margin-bottom: 1rem; }
+        .section-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 300; line-height: 1.1; margin-bottom: 1.5rem; }
+        .section-title em { font-style: italic; color: var(--muted); }
+
+        /* ── EXPLORER ── */
+        .explorer { background: var(--light); }
+        .explorer-desc { font-size: 1.1rem; font-weight: 300; color: var(--muted); max-width: 50ch; line-height: 1.8; margin-bottom: 3rem; }
+        .endpoints-grid { display: grid; gap: 1px; background: var(--ink); border: 1px solid var(--ink); margin-bottom: 3rem; }
+        .endpoint-card { background: var(--paper); padding: 2rem; cursor: pointer; transition: background 0.2s; }
+        .endpoint-card:hover { background: #ede8df; }
+        .endpoint-card.active { background: var(--ink); color: var(--paper); }
+        .endpoint-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+        .method-badge { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; padding: 0.25rem 0.6rem; background: var(--accent); color: white; flex-shrink: 0; }
+        .endpoint-path { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.05em; }
+        .endpoint-desc { font-size: 0.95rem; font-weight: 300; color: var(--muted); line-height: 1.6; }
+        .active .endpoint-desc { color: #a09880; }
+
+        /* ── PLAYGROUND ── */
+        .playground { margin-top: 2rem; border: 1px solid var(--ink); overflow: hidden; }
+        .playground-bar { background: var(--ink); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+        .playground-bar span { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+        .playground-controls { padding: 1.5rem; background: #ede8df; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .control-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+        .control-input { font-family: var(--mono); font-size: 0.8rem; padding: 0.5rem 0.8rem; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); width: 100px; outline: none; }
+        .control-input:focus { border-color: var(--accent); }
+        .btn-run { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.55rem 1.5rem; background: var(--accent); color: white; border: none; cursor: pointer; transition: opacity 0.2s; }
+        .btn-run:hover { opacity: 0.8; }
+        .playground-result { padding: 1.5rem; background: var(--ink); min-height: 200px; max-height: 420px; overflow-y: auto; }
+        .result-placeholder { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); font-style: italic; }
+        .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+        .result-card { background: #2a2520; padding: 1.25rem; border-left: 2px solid var(--warm); }
+        .result-card-title { font-size: 0.95rem; color: var(--paper); margin-bottom: 0.4rem; line-height: 1.3; }
+        .result-card-meta { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); line-height: 1.8; }
+        .result-card-link { display: inline-block; margin-top: 0.75rem; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warm); text-decoration: none; border-bottom: 1px solid rgba(200,169,122,0.3); padding-bottom: 1px; }
+        .result-card-link:hover { border-color: var(--warm); }
+        .result-single { font-family: var(--mono); font-size: 0.72rem; color: var(--paper); line-height: 1.9; }
+        .result-single .key { color: var(--warm); }
+        .result-single .val { color: #a0c4b8; }
+        .result-image { max-width: 100%; max-height: 300px; object-fit: contain; margin-top: 0.5rem; }
+        .pagination-info { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); padding: 0.75rem 1.5rem; background: #1a1714; border-top: 1px solid #2a2520; display: flex; gap: 2rem; }
+
+        /* ── DEVS ── */
+        .devs { border-top: 1px solid var(--light); }
+        .devs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 3rem; }
+        .dev-block { display: flex; flex-direction: column; gap: 1rem; }
+        .dev-block-title { font-size: 1.1rem; font-weight: 300; letter-spacing: 0.02em; }
+        .dev-block-desc { font-size: 0.95rem; font-weight: 300; color: var(--muted); line-height: 1.7; }
+        .code-pill { font-family: var(--mono); font-size: 0.72rem; background: var(--ink); color: var(--warm); padding: 0.8rem 1.2rem; letter-spacing: 0.05em; display: inline-block; }
+
+        /* ── FOOTER ── */
+        footer { background: var(--ink); color: var(--muted); padding: 2rem 4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        footer span { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero, section, .stats, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .devs-grid { grid-template-columns: 1fr; }
+            .stats { gap: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <nav class="nav">
+        <div class="nav-left">
+            <span class="nav-logo">Nymphéas API · v1</span>
+        </div>
+        <div class="nav-right">
+            <div class="lang-toggle">
+                <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+                <span class="lang-sep">·</span>
+                <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+            </div>
+            <a href="/swagger-ui.html" class="nav-link" data-i18n="nav.docs">API Docs →</a>
+        </div>
+    </nav>
+
+    <div class="hero-body">
+        <p class="eyebrow" data-i18n="hero.eyebrow">REST API · Claude Monet · Catalogue</p>
+        <h1 class="hero-title">Les<br/><em>Nymphéas</em></h1>
+        <p class="hero-sub" data-i18n="hero.sub">
+            An open catalogue of Claude Monet's water lily paintings —
+            260 works, exhaustively documented, freely accessible.
+        </p>
+        <div class="hero-actions">
+            <a href="#explorer" class="btn btn-primary" data-i18n="hero.cta.explore">Explore the collection</a>
+            <a href="/swagger-ui.html" class="btn btn-ghost" data-i18n="hero.cta.docs">API documentation</a>
+        </div>
+    </div>
+
+    <div class="hero-footer">
+        <span id="baseUrlDisplay"></span>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <span class="stat-number">260</span>
+        <span class="stat-label" data-i18n="stats.works">Works catalogued</span>
+    </div>
+    <div class="stat">
+        <span class="stat-number">1890</span>
+        <span class="stat-label" data-i18n="stats.date">Earliest known date</span>
+    </div>
+    <div class="stat">
+        <span class="stat-number">3</span>
+        <span class="stat-label" data-i18n="stats.endpoints">Endpoints</span>
+    </div>
+    <div class="stat">
+        <span class="stat-number">REST</span>
+        <span class="stat-label" data-i18n="stats.arch">Architecture</span>
+    </div>
+</div>
+
+<section class="explorer" id="explorer">
+    <p class="section-label" data-i18n="explorer.label">Explore</p>
+    <h2 class="section-title" data-i18n="explorer.title">Browse the<br/><em>collection</em></h2>
+    <p class="explorer-desc" data-i18n="explorer.desc">
+        Select an endpoint below and run it directly — no technical knowledge required.
+    </p>
+
+    <div class="endpoints-grid">
+        <div class="endpoint-card active" data-endpoint="list" onclick="selectEndpoint(this,'list')">
+            <div class="endpoint-header">
+                <span class="method-badge">GET</span>
+                <span class="endpoint-path">/api/v1/nympheas</span>
+            </div>
+            <p class="endpoint-desc" data-i18n="endpoint.list.desc">Browse all Nymphéas, page by page.</p>
+        </div>
+        <div class="endpoint-card" data-endpoint="single" onclick="selectEndpoint(this,'single')">
+            <div class="endpoint-header">
+                <span class="method-badge">GET</span>
+                <span class="endpoint-path">/api/v1/nympheas/{id}</span>
+            </div>
+            <p class="endpoint-desc" data-i18n="endpoint.single.desc">Retrieve a single work by its identifier.</p>
+        </div>
+        <div class="endpoint-card" data-endpoint="image" onclick="selectEndpoint(this,'image')">
+            <div class="endpoint-header">
+                <span class="method-badge">GET</span>
+                <span class="endpoint-path">/api/v1/images/{filename}</span>
+            </div>
+            <p class="endpoint-desc" data-i18n="endpoint.image.desc">View the image file for a given work.</p>
+        </div>
+    </div>
+
+    <div class="playground">
+        <div class="playground-bar">
+            <span>GET</span>
+            <span id="playgroundPath">/api/v1/nympheas</span>
+        </div>
+        <div class="playground-controls" id="playgroundControls"></div>
+        <div class="playground-result" id="playgroundResult">
+            <p class="result-placeholder" data-i18n="playground.idle">Press Run to fetch data from the API.</p>
+        </div>
+        <div class="pagination-info" id="paginationInfo" style="display:none">
+            <span id="paginationText"></span>
+        </div>
+    </div>
+</section>
+
+<section class="devs">
+    <p class="section-label" data-i18n="devs.label">Developers</p>
+    <h2 class="section-title" data-i18n="devs.title">Built for<br/><em>integration</em></h2>
+    <div class="devs-grid">
+        <div class="dev-block">
+            <h3 class="dev-block-title" data-i18n="devs.swagger.title">Interactive documentation</h3>
+            <p class="dev-block-desc" data-i18n="devs.swagger.desc">
+                Full OpenAPI 3 specification available via Swagger UI.
+                Try every endpoint, inspect schemas and response models.
+            </p>
+            <a href="/swagger-ui.html" class="btn btn-primary" style="align-self:flex-start;margin-top:0.5rem" data-i18n="devs.swagger.btn">Open Swagger UI</a>
+        </div>
+        <div class="dev-block">
+            <h3 class="dev-block-title" data-i18n="devs.endpoints.title">Base endpoints</h3>
+            <p class="dev-block-desc" data-i18n="devs.endpoints.desc">All endpoints are paginated and return JSON.</p>
+            <span class="code-pill">GET /api/v1/nympheas?page=0&amp;size=20</span>
+            <span class="code-pill">GET /api/v1/nympheas/{id}</span>
+            <span class="code-pill">GET /api/v1/images/{filename}</span>
+            <span class="code-pill">GET /v3/api-docs</span>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <span>Nymphéas API · Claude Monet Catalogue</span>
+    <span>Spring Boot 4 · Clean Architecture · REST</span>
+</footer>
+
+<script>
+    const i18n = {
+        en: {
+            'nav.docs':             'API Docs →',
+            'hero.eyebrow':         'REST API · Claude Monet · Catalogue',
+            'hero.sub':             "An open catalogue of Claude Monet's water lily paintings — 260 works, exhaustively documented, freely accessible.",
+            'hero.cta.explore':     'Explore the collection',
+            'hero.cta.docs':        'API documentation',
+            'stats.works':          'Works catalogued',
+            'stats.date':           'Earliest known date',
+            'stats.endpoints':      'Endpoints',
+            'stats.arch':           'Architecture',
+            'explorer.label':       'Explore',
+            'explorer.title':       'Browse the<br/><em>collection</em>',
+            'explorer.desc':        'Select an endpoint below and run it directly — no technical knowledge required.',
+            'endpoint.list.desc':   'Browse all Nymphéas, page by page.',
+            'endpoint.single.desc': 'Retrieve a single work by its identifier.',
+            'endpoint.image.desc':  'View the image file for a given work.',
+            'playground.idle':      'Press Run to fetch data from the API.',
+            'playground.loading':   'Loading...',
+            'playground.run':       'Run →',
+            'ctrl.page':            'Page',
+            'ctrl.size':            'Size',
+            'ctrl.id':              'ID',
+            'ctrl.filename':        'Filename',
+            'pagination':           (p,t,total) => `Page ${p} of ${t} · ${total} works total`,
+            'card.view':            'View image →',
+            'devs.label':           'Developers',
+            'devs.title':           'Built for<br/><em>integration</em>',
+            'devs.swagger.title':   'Interactive documentation',
+            'devs.swagger.desc':    'Full OpenAPI 3 specification available via Swagger UI. Try every endpoint, inspect schemas and response models.',
+            'devs.swagger.btn':     'Open Swagger UI',
+            'devs.endpoints.title': 'Base endpoints',
+            'devs.endpoints.desc':  'All endpoints are paginated and return JSON.',
+            'error.notfound':       'Image not found: ',
+            'error.network':        'Network error: ',
+            'error.display':        'Could not display image.',
+        },
+        fr: {
+            'nav.docs':             'Documentation →',
+            'hero.eyebrow':         'API REST · Claude Monet · Catalogue',
+            'hero.sub':             'Un catalogue ouvert des Nymphéas de Claude Monet — 260 œuvres, exhaustivement documentées, librement accessibles.',
+            'hero.cta.explore':     'Explorer la collection',
+            'hero.cta.docs':        'Documentation API',
+            'stats.works':          'Œuvres cataloguées',
+            'stats.date':           'Date la plus ancienne',
+            'stats.endpoints':      'Endpoints',
+            'stats.arch':           'Architecture',
+            'explorer.label':       'Explorer',
+            'explorer.title':       'Parcourir la<br/><em>collection</em>',
+            'explorer.desc':        "Sélectionnez un endpoint ci-dessous et exécutez-le directement — aucune connaissance technique requise.",
+            'endpoint.list.desc':   'Parcourir tous les Nymphéas, page par page.',
+            'endpoint.single.desc': 'Récupérer une œuvre par son identifiant.',
+            'endpoint.image.desc':  "Afficher le fichier image d'une œuvre.",
+            'playground.idle':      "Appuyez sur Lancer pour interroger l'API.",
+            'playground.loading':   'Chargement...',
+            'playground.run':       'Lancer →',
+            'ctrl.page':            'Page',
+            'ctrl.size':            'Taille',
+            'ctrl.id':              'ID',
+            'ctrl.filename':        'Fichier',
+            'pagination':           (p,t,total) => `Page ${p} sur ${t} · ${total} œuvres au total`,
+            'card.view':            "Voir l'image →",
+            'devs.label':           'Développeurs',
+            'devs.title':           "Conçu pour<br/><em>l'intégration</em>",
+            'devs.swagger.title':   'Documentation interactive',
+            'devs.swagger.desc':    'Spécification OpenAPI 3 complète via Swagger UI. Testez chaque endpoint, inspectez les schémas et les modèles de réponse.',
+            'devs.swagger.btn':     'Ouvrir Swagger UI',
+            'devs.endpoints.title': 'Endpoints de base',
+            'devs.endpoints.desc':  'Tous les endpoints sont paginés et retournent du JSON.',
+            'error.notfound':       'Image introuvable : ',
+            'error.network':        'Erreur réseau : ',
+            'error.display':        "Impossible d'afficher l'image.",
+        }
+    };
+
+    let lang = 'en';
+    let currentEndpoint = 'list';
+
+    function t(key, ...args) {
+        const val = i18n[lang][key];
+        return typeof val === 'function' ? val(...args) : (val ?? key);
+    }
+
+    function setLang(l) {
+        lang = l;
+        document.getElementById('btn-en').classList.toggle('active', l === 'en');
+        document.getElementById('btn-fr').classList.toggle('active', l === 'fr');
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const val = i18n[lang][el.getAttribute('data-i18n')];
+            if (typeof val === 'string') el.innerHTML = val;
+        });
+
+        renderControls(currentEndpoint);
+
+        const result = document.getElementById('playgroundResult');
+        if (result.querySelector('.result-placeholder')) {
+            result.innerHTML = `<p class="result-placeholder">${t('playground.idle')}</p>`;
+        }
+    }
+
+    function renderControls(type) {
+        const controls = document.getElementById('playgroundControls');
+        const path = document.getElementById('playgroundPath');
+
+        if (type === 'list') {
+            path.textContent = '/api/v1/nympheas';
+            const page = controls.querySelector('#paramPage')?.value ?? '0';
+            const size = controls.querySelector('#paramSize')?.value ?? '12';
+            controls.innerHTML = `
+        <div class="control-group">
+          <label class="control-label">${t('ctrl.page')}</label>
+          <input class="control-input" id="paramPage" type="number" value="${page}" min="0"/>
+        </div>
+        <div class="control-group">
+          <label class="control-label">${t('ctrl.size')}</label>
+          <input class="control-input" id="paramSize" type="number" value="${size}" min="1" max="100"/>
+        </div>
+        <button class="btn-run" onclick="runEndpoint()">${t('playground.run')}</button>`;
+
+        } else if (type === 'single') {
+            path.textContent = '/api/v1/nympheas/{id}';
+            const id = controls.querySelector('#paramId')?.value ?? '1';
+            controls.innerHTML = `
+        <div class="control-group">
+          <label class="control-label">${t('ctrl.id')}</label>
+          <input class="control-input" id="paramId" type="number" value="${id}" min="1"/>
+        </div>
+        <button class="btn-run" onclick="runEndpoint()">${t('playground.run')}</button>`;
+
+        } else if (type === 'image') {
+            path.textContent = '/api/v1/images/{filename}';
+            const fn = controls.querySelector('#paramFilename')?.value ?? "1890_001_Nymphéas_(Fragment).jpg";
+            controls.innerHTML = `
+        <div class="control-group" style="flex:1">
+          <label class="control-label">${t('ctrl.filename')}</label>
+          <input class="control-input" id="paramFilename" type="text" value="${fn}" style="width:340px"/>
+        </div>
+        <button class="btn-run" onclick="runEndpoint()">${t('playground.run')}</button>`;
+        }
+    }
+
+    function selectEndpoint(el, type) {
+        document.querySelectorAll('.endpoint-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        currentEndpoint = type;
+        document.getElementById('playgroundResult').innerHTML = `<p class="result-placeholder">${t('playground.idle')}</p>`;
+        document.getElementById('paginationInfo').style.display = 'none';
+        renderControls(type);
+    }
+
+    async function runEndpoint() {
+        const result = document.getElementById('playgroundResult');
+        const paginationInfo = document.getElementById('paginationInfo');
+        result.innerHTML = `<p class="result-placeholder">${t('playground.loading')}</p>`;
+        paginationInfo.style.display = 'none';
+
+        try {
+            if (currentEndpoint === 'list') {
+                const page = document.getElementById('paramPage').value;
+                const size = document.getElementById('paramSize').value;
+                const res  = await fetch(`/api/v1/nympheas?page=${page}&size=${size}`);
+                const data = await res.json();
+                if (!res.ok) { showError(result, data); return; }
+
+                result.innerHTML = `<div class="result-grid">${data.content.map(n => `
+          <div class="result-card">
+            <div class="result-card-title">${n.title || '—'}</div>
+            <div class="result-card-meta">
+              ${n.date || ''}<br/>
+              ${n.dimensions || ''}<br/>
+              ${n.location ? n.location.substring(0,50) + (n.location.length > 50 ? '…' : '') : ''}
+            </div>
+            ${n.imageUrl ? `<a class="result-card-link" href="${n.imageUrl}" target="_blank">${t('card.view')}</a>` : ''}
+          </div>`).join('')}</div>`;
+
+                paginationInfo.style.display = 'flex';
+                document.getElementById('paginationText').textContent =
+                    t('pagination', data.page + 1, data.totalPages, data.totalElements);
+
+            } else if (currentEndpoint === 'single') {
+                const res  = await fetch(`/api/v1/nympheas/${document.getElementById('paramId').value}`);
+                const data = await res.json();
+                if (!res.ok) { showError(result, data); return; }
+
+                const fields = ['id','title','date','dimensions','location','country','statut','localFile'];
+                result.innerHTML = `
+          <div class="result-single">${fields.map(k =>
+                    `<div><span class="key">${k}</span>  <span class="val">${data[k] ?? '—'}</span></div>`
+                ).join('')}</div>
+          ${data.imageUrl ? `<img class="result-image" src="${data.imageUrl}" alt="${data.title}" onerror="this.style.display='none'"/>` : ''}`;
+
+            } else if (currentEndpoint === 'image') {
+                const filename = document.getElementById('paramFilename').value;
+                const url = `/api/v1/images/${encodeURIComponent(filename)}`;
+                const res = await fetch(url, { method: 'HEAD' });
+                if (!res.ok) { showError(result, { message: t('error.notfound') + filename }); return; }
+                result.innerHTML = `<img class="result-image" src="${url}" alt="${filename}" onerror="this.outerHTML='<p class=result-placeholder>${t('error.display')}</p>'"/>`;
+            }
+        } catch(e) {
+            result.innerHTML = `<p class="result-placeholder">${t('error.network')}${e.message}</p>`;
+        }
+    }
+
+    function showError(el, data) {
+        el.innerHTML = `<div class="result-single">
+      <div><span class="key">status</span>  <span class="val" style="color:#e07070">${data.status ?? ''}</span></div>
+      <div><span class="key">error</span>   <span class="val" style="color:#e07070">${data.error ?? ''}</span></div>
+      <div><span class="key">message</span> <span class="val">${data.message ?? ''}</span></div>
+    </div>`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('baseUrlDisplay').textContent =
+            'Base URL — ' + window.location.origin + '/api/v1';
+        renderControls('list');
+    });
+</script>
+</body>
+</html>

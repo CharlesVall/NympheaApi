@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @Builder
-@JsonPropertyOrder({"id", "title", "date", "dimensions", "location", "country", "statut", "localFile"})
+@JsonPropertyOrder({"id", "title", "date", "dimensions", "location", "country", "statut", "localFile", "imageUrl"})
 public class NympheaDto {
     Long id;
     String title;
@@ -16,4 +16,5 @@ public class NympheaDto {
     String country;
     String statut;
     String localFile;
+    String imageUrl;
 }

@@ -28,7 +28,7 @@ public class DataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         if (nympheaRepository.findAll(0, 1).getTotalElements() > 0) {
-            log.info("DataLoader — db already filed");
+            log.info("DataLoader — already populated, skipping");
             return;
         }
 
