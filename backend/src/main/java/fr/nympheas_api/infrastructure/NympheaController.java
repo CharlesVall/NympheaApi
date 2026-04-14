@@ -1,4 +1,4 @@
-package fr.nympheas_api.infrastructure.rest;
+package fr.nympheas_api.infrastructure;
 
 import fr.nympheas_api.application.dto.ErrorResponse;
 import fr.nympheas_api.application.dto.NympheaDto;

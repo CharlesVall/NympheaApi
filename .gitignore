@@ -1,3 +1,4 @@
 nympheas_output/
 nympheas_output/*
 .idea
+.env

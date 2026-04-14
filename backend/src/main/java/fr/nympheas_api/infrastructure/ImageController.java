@@ -1,4 +1,4 @@
-package fr.nympheas_api.infrastructure.rest;
+package fr.nympheas_api.infrastructure;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
