@@ -32,4 +32,18 @@ build/
 ### VS Code ###
 .vscode/
 
-.env
+### Environnement ###
+.env.template
+.env.*
+!.env.template
+
+### Logs ###
+*.log
+logs/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Railway ###
+.railway/
